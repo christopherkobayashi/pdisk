@@ -25,17 +25,11 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. 
  */
 
-// for printf()
 #include <stdio.h>
-// for malloc() & free()
 #include <stdlib.h>
-// for lseek(), read(), write(), close()
 #include <unistd.h>
-// for open()
 #include <fcntl.h>
-// for LONG_MAX
 #include <limits.h>
-// for errno
 #include <errno.h>
 
 #include <sys/ioctl.h>
@@ -52,8 +46,6 @@
 /*
  * Defines
  */
-#define loff_t off_t
-#define llseek lseek
 #define LOFF_MAX LLONG_MAX
 
 /*
@@ -146,7 +138,7 @@ compute_block_size(int fd)
 {
     int size;
     int max_size;
-    loff_t x;
+    off_t x;
     long t;
     int i;
     char *buffer;
@@ -169,7 +161,7 @@ compute_block_size(int fd)
 	    if (size == 0) {
 		break;
 	    }
-	    if ((x = llseek(fd, (loff_t)0, 0)) < 0) {
+	    if ((x = lseek(fd, (off_t)0, 0)) < 0) {
 		error(errno, "Can't seek on file");
 		break;
 	    }
@@ -188,7 +180,7 @@ open_file_as_media(char *file, int oflag)
 {
     FILE_MEDIA	a;
     int			fd;
-    loff_t off;
+    off_t off;
     struct stat info;
 	
     if (file_inited == 0) {
@@ -202,7 +194,7 @@ open_file_as_media(char *file, int oflag)
 	if (a != 0) {
 	    a->m.kind = file_info.kind;
 	    a->m.grain = compute_block_size(fd);
-	    off = llseek(fd, (loff_t)0, 2);	/* seek to end of media */
+	    off = lseek(fd, (off_t)0, 2);	/* seek to end of media */
 	    //printf("file size = %Ld\n", off);
 	    a->m.size_in_bytes = (long long) off;
 	    a->m.do_read = read_file_media;
@@ -229,7 +221,7 @@ read_file_media(MEDIA m, long long offset, unsigned long count, void *address)
 {
     FILE_MEDIA a;
     long rtn_value;
-    loff_t off;
+    off_t off;
     int t;
 
     a = (FILE_MEDIA) m;
@@ -255,7 +247,7 @@ read_file_media(MEDIA m, long long offset, unsigned long count, void *address)
     } else {
 	/* do the read */
 	off = offset;
-	if ((off = llseek(a->fd, off, 0)) >= 0) {
+	if ((off = lseek(a->fd, off, 0)) >= 0) {
 	    if ((t = read(a->fd, address, count)) == (ssize_t)count) {
 		rtn_value = 1;
 	    } else {
@@ -274,7 +266,7 @@ write_file_media(MEDIA m, long long offset, unsigned long count, void *address)
 {
     FILE_MEDIA a;
     long rtn_value;
-    loff_t off;
+    off_t off;
     int t;
 	
     a = (FILE_MEDIA) m;
@@ -292,7 +284,7 @@ write_file_media(MEDIA m, long long offset, unsigned long count, void *address)
     } else {
 	/* do the write  */
 	off = offset;
-	if ((off = llseek(a->fd, off, 0)) >= 0) {
+	if ((off = lseek(a->fd, off, 0)) >= 0) {
 		if ((t = write(a->fd, address, count)) == (ssize_t)count) {
 		if (off + count > a->m.size_in_bytes) {
 			a->m.size_in_bytes = off + count;
