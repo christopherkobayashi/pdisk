@@ -43,12 +43,6 @@
 #include "io.h"
 #include "errors.h"
 
-#ifdef __APPLE__
-#include <CoreFoundation/CoreFoundation.h>
-#include <IOKit/IOBSD.h>
-#include <IOKit/IOKitLib.h>
-#include <IOKit/storage/IOMedia.h>
-#endif
 
 //
 // Defines
@@ -389,62 +383,6 @@ dump_partition_entry(partition_map *entry, int type_length, int name_length, int
 void
 list_all_disks()
 {
-#ifdef __APPLE__
-  char name[20] = "/dev/r";
-    MEDIA m;
-    DPME * data;
-    CFMutableDictionaryRef matching = NULL;
-    kern_return_t ret;
-    io_iterator_t iterator;
-    io_service_t media;
-
-    data = (DPME *) malloc(PBLOCK_SIZE);
-    if (data == NULL) {
-	error(errno, "can't allocate memory for try buffer");
-	return;
-    }
-
-    matching = IOServiceMatching(kIOMediaClass);
-    CFDictionaryAddValue(matching, CFSTR(kIOMediaWholeKey), kCFBooleanTrue);
-
-    ret = IOServiceGetMatchingServices(kIOMasterPortDefault,
-				       matching,
-				       &iterator);
-
-    if(ret != KERN_SUCCESS) {
-      free(data);
-      return;
-    }
-
-    while((media = IOIteratorNext(iterator))) {
-      CFStringRef blockdev;
-
-      blockdev = IORegistryEntryCreateCFProperty(media,
-						 CFSTR(kIOBSDNameKey),
-						 kCFAllocatorDefault,
-						 0);
-      if(blockdev) {
-	
-	if(CFStringGetCString(blockdev, name+sizeof("/dev/r")-1,
-			      sizeof(name)-sizeof("/dev/r")+1,
-			      kCFStringEncodingUTF8)) {
-
-	  if ((m = open_pathname_as_media(name, O_RDONLY)) == 0) {
-	    error(errno, "can't open file '%s'", name);
-	  } else {
-	    close_media(m);
-	  }
-	  dump(name);
-	}
-	CFRelease(blockdev);
-      }
-      IOObjectRelease(media);
-    }
-
-    IOObjectRelease(iterator);
-
-    free(data);
-#else
     MEDIA_ITERATOR iter;
     MEDIA m;
     DPME * data;
@@ -475,7 +413,6 @@ list_all_disks()
     }
 
     free(data);
-#endif
 }
 
 

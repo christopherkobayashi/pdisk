@@ -186,13 +186,8 @@ main(int argc, char **argv)
 	    edit(argv[name_index++], 0);
 	}
     } else if (!vflag) {
-#ifdef __APPLE__
-	interactive = 1;
-	interact();
-#else
 	usage("no device argument");
  	do_help();
-#endif
     }
     return 0;
 }
@@ -636,11 +631,7 @@ do_create_partition(partition_map_header *map, int get_type)
 	return;
     }
     if (get_type == 0) {
-#ifdef __APPLE__
-	add_partition_to_map(name, kHFSType, base, length, map);
-#else
 	add_partition_to_map(name, kUnixType, base, length, map);
-#endif
 #if 0 /* this check is not found in linux fdisk-0.1 */
 	if (map->blocks_in_map > MAX_LINUX_MAP) {
 	    error(-1, "Map contains more than %d blocks - Linux may have trouble", MAX_LINUX_MAP);
