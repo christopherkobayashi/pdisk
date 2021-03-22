@@ -29,12 +29,7 @@
 #include <stdio.h>
 
 // for malloc() & free()
-#ifndef __linux__
-#include <stdlib.h>
-//#include <unistd.h>
-#else
 #include <malloc.h>
-#endif
 
 // for strcmp()
 #include <string.h>
@@ -467,9 +462,7 @@ list_all_disks()
     	while ((name = step_media_iterator(iter)) != 0) {
 
 	    if ((m = open_pathname_as_media(name, O_RDONLY)) == 0) {
-#if defined(__linux__) || defined(__unix__)
 		error(errno, "can't open file '%s'", name);
-#endif
 	    } else {
 		close_media(m);
 

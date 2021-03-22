@@ -48,6 +48,7 @@ MAC_SOURCE= \
 UNIX_SOURCE= \
 	bitfield.c \
 	bitfield.h \
+	cmdline.c \
 	convert.c \
 	convert.h \
 	cvt_pt.c \
@@ -84,6 +85,7 @@ UNIX_SOURCE= \
 COMMON_OBJECTS = \
 	partition_map.o \
 	bitfield.o \
+	cmdline.o \
 	convert.o \
 	deblock_media.o \
 	file_media.o \
@@ -102,7 +104,8 @@ UNIX_OBJECTS = \
 
 CVT_OBJECTS = \
 	cvt_pt.o \
-	$(COMMON_OBJECTS)
+	dump.o \
+	$(COMMON_OBJECTS) -lbsd
 
 
 
@@ -129,14 +132,14 @@ MAC_68KBINARY= \
 	pdisk_68k.hqx
 
 
-CFLAGS = -Wall -D__unix__
+CFLAGS = -Wall -Werror
 DIST_TAR_FLAGS = cvf
 
 
 all: $(UNIX_BINARIES)
 
 pdisk: $(UNIX_OBJECTS)
-	cc -o pdisk $(UNIX_OBJECTS)
+	cc -o pdisk $(UNIX_OBJECTS) -lbsd
 
 cvt_pt: $(CVT_OBJECTS)
 	cc -o cvt_pt $(CVT_OBJECTS)

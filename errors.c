@@ -29,11 +29,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-// for exit()
-#ifndef __linux__
 #include <stdlib.h>
-#endif
-// for strrchr
 #include <string.h>
 
 // for va_start(), etc.
@@ -62,11 +58,6 @@
 // Global Variables
 //
 char *program_name;
-#ifdef NeXT
-extern int errno;
-extern int sys_nerr;
-extern const char * const sys_errlist[];
-#endif
 
 
 //
@@ -80,15 +71,11 @@ extern const char * const sys_errlist[];
 void
 init_program_name(char **argv)
 {
-#if defined(__linux__) || defined(__unix__)
     if ((program_name = strrchr(argv[0], '/')) != (char *)NULL) {
 	program_name++;
     } else {
 	program_name = argv[0];
     }
-#else
-    program_name = "pdisk";
-#endif
 }
 
 
@@ -98,11 +85,7 @@ do_help()
     fprintf(stderr, "usage:");
     fprintf(stderr, "\t%s [-h|--help]\n", program_name);
     fprintf(stderr, "\t%s [-i|--interactive]\n", program_name);
-#if defined(__linux__) || defined(__APPLE__)
     fprintf(stderr, "\t%s [-l|--list] [name] [...]\n", program_name);
-#else
-    fprintf(stderr, "\t%s [-l|--list] name [...]\n", program_name);
-#endif
     fprintf(stderr, "\t%s [-r|--readonly] name [...]\n", program_name);
     fprintf(stderr, "\t%s [-v|--version]\n", program_name);
     fprintf(stderr, "\t%s name [...]\n", program_name);
@@ -142,16 +125,11 @@ fatal(int value, const char *fmt, ...)
     vfprintf(stderr, fmt, ap);
     va_end(ap);
 
-#if defined(__linux__) || defined(NeXT) || defined(__unix__)
-    if (value > 0 && value < sys_nerr) {
-	fprintf(stderr, "  (%s)\n", sys_errlist[value]);
+    if (value > 0) {
+	fprintf(stderr, "  (%s)\n", strerror(value));
     } else {
 	fprintf(stderr, "\n");
     }
-#else
-    fprintf(stderr, "\n");
-    printf("Processing stopped: Choose 'Quit' from the file menu to quit.\n\n");
-#endif
     exit(value);
 }
 
@@ -171,13 +149,9 @@ error(int value, const char *fmt, ...)
     vfprintf(stderr, fmt, ap);
     va_end(ap);
 
-#if defined(__linux__) || defined(NeXT) || defined(__unix__)
-    if (value > 0 && value < sys_nerr) {
-	fprintf(stderr, "  (%s)\n", sys_errlist[value]);
+    if (value > 0) {
+	fprintf(stderr, "  (%s)\n", strerror(value));
     } else {
 	fprintf(stderr, "\n");
     }
-#else
-    fprintf(stderr, "\n");
-#endif
 }

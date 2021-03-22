@@ -30,23 +30,10 @@
 // for printf()
 #include <stdio.h>
 
-#if defined(__linux__) || defined(__unix__)
 #include <getopt.h>
-#endif
-#ifdef __linux__
 #include <malloc.h>
-#else
-// for malloc() & free()
-#include <stdlib.h>
-#if !defined(__unix__)
-// for SIOUXsettings
-#include <SIOUX.h>
-#endif
-#endif
 
-#ifdef __unix__
 #include <unistd.h>
-#endif
 
 // for strncpy() & strlen()
 #include <string.h>
@@ -55,11 +42,9 @@
 // for errno
 #include <errno.h>
 
-#ifdef __linux__
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 #include <linux/hdreg.h>
-#endif
 
 #include "pdisk.h"
 #include "io.h"
@@ -151,17 +136,7 @@ void print_top_notes(void);
 int
 main(int argc, char **argv)
 {
-#if defined(__linux__) || defined(__unix__)
     int name_index;
-#else
-    SIOUXSettings.rows = 100;
-    printf("This app uses the SIOUX console library\n");
-    printf("Choose 'Quit' from the file menu to quit.\n\n");
-    printf("Use fake disk names (/dev/scsi<bus>.<id>; i.e. /dev/scsi0.1, /dev/scsi1.3, etc.).\n\n");
- 
-    SIOUXSettings.autocloseonquit = 0;	/* Do we close the SIOUX window on program termination ... */
-    SIOUXSettings.asktosaveonclose = 0;	/* Do we offer to save on a close ... */
-#endif
 
     init_program_name(argv);
 
@@ -180,7 +155,6 @@ main(int argc, char **argv)
 		VERSION, get_version_string());
     }
 
-#if defined(__linux__) || defined(__unix__)
     if (argc > 1) {
 	do_command_line(argc - 1, argv + 1);
     }
@@ -202,12 +176,7 @@ main(int argc, char **argv)
 		dump(argv[name_index++]);
 	    }
 	} else {
-#if defined(__linux__) || defined(__APPLE__)
 	    list_all_disks();
-#else
-	    usage("no device argument");
-	    do_help();
-#endif
 	}
     } else if (name_index < argc) {
 	interactive = 1;
@@ -224,30 +193,12 @@ main(int argc, char **argv)
 #endif
     }
     return 0;
-#else
-    interactive = 1;
-
-    interact();
-
-    SIOUXSettings.autocloseonquit = 1;
-    //printf("Processing stopped: Choose 'Quit' from the file menu to quit.\n\n");
-    exit(0);
-#endif
 }
 
 
 void
 print_top_notes()
 {
-#if !defined(__linux__) && !defined(__unix__)
-    printf("Notes:\n");
-    printf("  Disks have fake names of the form /dev/scsi<bus>.<id>\n");
-    printf("  For example, /dev/scsi0.1, /dev/scsi1.3, and so on.\n");
-    printf("  Linux style names are also allowed (i.e /dev/sda or /dev/hda).\n");
-    printf("  Due to some technical problems these names may not match\n");
-    printf("  the 'real' linux names.\n");
-    printf("\n");
-#endif
 }
 
 
@@ -272,9 +223,7 @@ interact()
 	    printf("  h    print help\n");
 	    printf("  v    print the version number and release date\n");
 	    printf("  l    list device's map\n");
-#if defined(__linux__) || defined(__APPLE__)
 	    printf("  L    list all devices' maps\n");
-#endif
 	    printf("  e    edit device's map\n");
 	    printf("  E    (edit map with specified block size)\n");
 	    printf("  r    toggle readonly flag\n");
@@ -296,11 +245,9 @@ interact()
 	case 'v':
 	    printf("version " VERSION " (" RELEASE_DATE ")\n");
 	    break;
-#if defined(__linux__) || defined(__APPLE__)
 	case 'L':
 	    list_all_disks();
 	    break;
-#endif
 	case 'l':
 	    if (get_string_argument("Name of device: ", &name, 1) == 0) {
 		bad_input("Bad name");
@@ -402,12 +349,10 @@ interact()
 }
 
 
-#if defined(__linux__) || defined(__unix__)
 int
 get_options(int argc, char **argv)
 {
     int c;
-#if defined(__linux__) || defined(__unix__)
     static struct option long_options[] =
     {
 	// name		has_arg			&flag	val
@@ -424,11 +369,6 @@ get_options(int argc, char **argv)
 	{0, 0, 0, 0}
     };
     int option_index = 0;
-#else
-    extern int opterr;		/* who does error messages */
-    extern int optopt;		/* char that caused the error */
-    int getopt_error;		/* getopt choked */
-#endif
     extern int optind;		/* next argv index */
     extern char *optarg;	/* pointer to argument */
     int flag = 0;
@@ -445,23 +385,10 @@ get_options(int argc, char **argv)
     cflag = CFLAG_DEFAULT;
     fflag = FFLAG_DEFAULT;
 
-#if defined(__linux__) || defined(__unix__)
     optind = 0;	// reset option scanner logic
     while ((c = getopt_long(argc, argv, "hlvdraLicf", long_options,
 	    &option_index)) >= 0)
-#else
-    opterr = 0;			/* tell getopt to be quiet */
-    while ((c = getopt(argc, argv, "hlvdraLicf")) != EOF)
-#endif
 	{
-#if !defined(__linux__) && !defined(__unix__)
-	if (c == '?') {
-	    getopt_error = 1;
-	    c = optopt;
-	} else {
-	    getopt_error = 0;
-	}
-#endif
 	switch (c) {
 	case kLongOption:
 	    // option_index would be used here
@@ -513,7 +440,6 @@ get_options(int argc, char **argv)
     }
     return optind;
 }
-#endif
 
 
 void

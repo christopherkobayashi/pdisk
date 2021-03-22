@@ -173,7 +173,7 @@ process(char *filename)
     }
 
     // 2)       open prefix of filename as partition map
-    map = open_partition_map(s, &valid_file, 0);
+    map = open_partition_map(s, &valid_file, 0, 0);
     if (!valid_file) {
         fatal(-1, "%s does not have a partition map", s);
         return;

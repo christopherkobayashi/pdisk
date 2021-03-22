@@ -166,9 +166,6 @@ os_reload_media(MEDIA m)
 }
 
 
-#if !defined(__linux__) && !defined(__unix__)
-#pragma mark -
-#endif
 
 
 

@@ -29,11 +29,9 @@
 #include <stdio.h>
 
 // for malloc(), calloc() & free()
-#ifndef __linux__
 #include <stdlib.h>
-#else
+#include <bsd/bsd.h>
 #include <malloc.h>
-#endif
 
 // for strncpy() & strcmp()
 #include <string.h>
@@ -314,13 +312,11 @@ read_partition_map(partition_map_header *map)
 void
 write_partition_map(partition_map_header *map)
 {
-    MEDIA m;
     char *block;
     partition_map * entry;
     int i = 0;
     int result = 0;
 
-    m = map->m;
     if (map->misc != NULL) {
 	convert_block0(map->misc, 0);
 	result = write_block(map, 0, (char *)map->misc);
@@ -345,7 +341,6 @@ write_partition_map(partition_map_header *map)
 	}
     }
 
-#ifdef __linux__
 	// zap the block after the map (if possible) to get around a bug.
     if (map->maximum_in_map > 0 &&  i < map->maximum_in_map) {
 	i += 1;
@@ -358,7 +353,6 @@ write_partition_map(partition_map_header *map)
 	    free(block);
 	}
     }
-#endif
 
     if (interactive)
 	printf("The partition table has been altered!\n\n");

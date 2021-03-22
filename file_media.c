@@ -38,17 +38,10 @@
 // for errno
 #include <errno.h>
 
-#ifdef __linux__
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 #include <linux/hdreg.h>
 #include <sys/stat.h>
-#else
-#ifdef __unix__
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#endif
-#endif
 
 #include "file_media.h"
 #include "errors.h"
@@ -57,21 +50,9 @@
 /*
  * Defines
  */
-#ifdef __linux__
-#define LOFF_MAX 9223372036854775807LL
-extern __loff_t llseek __P ((int __fd, __loff_t __offset, int __whence));
-#else
-#ifdef __unix__
 #define loff_t off_t
 #define llseek lseek
 #define LOFF_MAX LLONG_MAX
-#else
-#define loff_t long
-#define llseek lseek
-#define LOFF_MAX LONG_MAX
-#endif
-#endif
-
 
 /*
  * Types
@@ -206,9 +187,7 @@ open_file_as_media(char *file, int oflag)
     FILE_MEDIA	a;
     int			fd;
     loff_t off;
-#if defined(__linux__) || defined(__unix__)
     struct stat info;
-#endif
 	
     if (file_inited == 0) {
 	    file_init();
@@ -222,11 +201,6 @@ open_file_as_media(char *file, int oflag)
 	    a->m.kind = file_info.kind;
 	    a->m.grain = compute_block_size(fd);
 	    off = llseek(fd, (loff_t)0, 2);	/* seek to end of media */
-#if !defined(__linux__) && !defined(__unix__)
-	    if (off <= 0) {
-		off = 1; /* XXX not right? */
-	    }
-#endif
 	    //printf("file size = %Ld\n", off);
 	    a->m.size_in_bytes = (long long) off;
 	    a->m.do_read = read_file_media;
@@ -235,13 +209,11 @@ open_file_as_media(char *file, int oflag)
 	    a->m.do_os_reload = os_reload_file_media;
 	    a->fd = fd;
 	    a->regular_file = 0;
-#if defined(__linux__) || defined(__unix__)
 	    if (fstat(fd, &info) < 0) {
 		error(errno, "can't stat file '%s'", file);
 	    } else {
 		a->regular_file = S_ISREG(info.st_mode);
 	    }
-#endif
 	} else {
 	    close(fd);
 	}
@@ -354,10 +326,8 @@ os_reload_file_media(MEDIA m)
 {
     FILE_MEDIA a;
     long rtn_value;
-#if defined(__linux__)
     int i;
     int saved_errno;
-#endif
 	
     a = (FILE_MEDIA) m;
     rtn_value = 0;
@@ -369,7 +339,6 @@ os_reload_file_media(MEDIA m)
 	/* okay - nothing to do */
 	rtn_value = 1;
     } else {
-#ifdef __linux__
 	sync();
 	sleep(2);
 	if ((i = ioctl(a->fd, BLKRRPART)) != 0) {
@@ -394,16 +363,12 @@ os_reload_file_media(MEDIA m)
 	    printf("Reboot your system to ensure the "
 		    "partition table is updated.\n");
 	}
-#endif
 	rtn_value = 1;
     }
     return rtn_value;
 }
 
 
-#if !defined(__linux__) && !defined(__unix__)
-#pragma mark -
-#endif
 
 
 FILE_MEDIA_ITERATOR
@@ -538,14 +503,12 @@ step_file_iterator(MEDIA_ITERATOR m)
 			bump = 1;
 		    } else if ((fd = open(result, O_RDONLY)) >= 0) {
 			close(fd);
-#if defined(__linux__) || defined(__unix__)
 		    } else if (errno == ENXIO || errno == ENODEV) {
 			if (a->style == kATA_Devices) {
 			    bump = -1;
 			} else {
 			    bump = 1;
 			}
-#endif
 		    }
 		    if (bump) {
 			if (bump > 0) {
