@@ -105,7 +105,7 @@ UNIX_OBJECTS = \
 CVT_OBJECTS = \
 	cvt_pt.o \
 	dump.o \
-	$(COMMON_OBJECTS) -lbsd
+	$(COMMON_OBJECTS)
 
 
 
@@ -139,7 +139,7 @@ DIST_TAR_FLAGS = cvf
 all: $(UNIX_BINARIES)
 
 pdisk: $(UNIX_OBJECTS)
-	cc -o pdisk $(UNIX_OBJECTS) -lbsd
+	cc -o pdisk $(UNIX_OBJECTS)
 
 cvt_pt: $(CVT_OBJECTS)
 	cc -o cvt_pt $(CVT_OBJECTS)

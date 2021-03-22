@@ -31,7 +31,7 @@
 // for malloc(), calloc() & free()
 #include <stdlib.h>
 #if defined(__linux__)
-#include <bsd/bsd.h>
+// #include <bsd/bsd.h>
 #endif
 #include <malloc.h>
 
@@ -794,17 +794,20 @@ bzb_init_slice(BZB *bp, int slice)
 	return;
     case 'a':
 	bp->bzb_type = FST;
-	strlcpy((char *)bp->bzb_mount_point, "/", sizeof(bp->bzb_mount_point));
+	snprintf((char *)bp->bzb_mount_point, sizeof(bp->bzb_mount_point), "/");
+//	strlcpy((char *)bp->bzb_mount_point, "/", sizeof(bp->bzb_mount_point));
 	bp->bzb_inode = 1;
 	bzb_root_set(bp,1);
 	bzb_usr_set(bp,1);
 	break;
     case 'b':
 	bp->bzb_type = FSTSFS;
-	strlcpy((char *)bp->bzb_mount_point, "(swap)", sizeof(bp->bzb_mount_point));
+	snprintf((char *)bp->bzb_mount_point, sizeof(bp->bzb_mount_point), "(swap)");
+//	strlcpy((char *)bp->bzb_mount_point, "(swap)", sizeof(bp->bzb_mount_point));
 	break;
     case 'g':
-	strlcpy((char *)bp->bzb_mount_point, "/usr", sizeof(bp->bzb_mount_point));
+	snprintf((char *)bp->bzb_mount_point, sizeof(bp->bzb_mount_point), "/usr");
+//	strlcpy((char *)bp->bzb_mount_point, "/usr", sizeof(bp->bzb_mount_point));
 	/* Fall through */
     default:
 	bp->bzb_type = FST;
