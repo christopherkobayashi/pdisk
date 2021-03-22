@@ -30,7 +30,9 @@
 
 // for malloc(), calloc() & free()
 #include <stdlib.h>
+#if defined(__linux__)
 #include <bsd/bsd.h>
+#endif
 #include <malloc.h>
 
 // for strncpy() & strcmp()

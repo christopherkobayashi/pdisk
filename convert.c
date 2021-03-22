@@ -27,7 +27,7 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. 
  */
 
-#include <endian.h>
+//#include <endian.h>
 
 #include "convert.h"
 

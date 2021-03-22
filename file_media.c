@@ -39,8 +39,10 @@
 #include <errno.h>
 
 #include <sys/ioctl.h>
+#if defined(__linux__)
 #include <linux/fs.h>
 #include <linux/hdreg.h>
+#endif
 #include <sys/stat.h>
 
 #include "file_media.h"
@@ -326,8 +328,10 @@ os_reload_file_media(MEDIA m)
 {
     FILE_MEDIA a;
     long rtn_value;
+#if defined(__linux__)
     int i;
     int saved_errno;
+#endif
 	
     a = (FILE_MEDIA) m;
     rtn_value = 0;
@@ -339,6 +343,7 @@ os_reload_file_media(MEDIA m)
 	/* okay - nothing to do */
 	rtn_value = 1;
     } else {
+#if defined(__linux__)
 	sync();
 	sleep(2);
 	if ((i = ioctl(a->fd, BLKRRPART)) != 0) {
@@ -363,6 +368,7 @@ os_reload_file_media(MEDIA m)
 	    printf("Reboot your system to ensure the "
 		    "partition table is updated.\n");
 	}
+#endif
 	rtn_value = 1;
     }
     return rtn_value;

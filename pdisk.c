@@ -43,8 +43,10 @@
 #include <errno.h>
 
 #include <sys/ioctl.h>
+#if defined(__linux__)
 #include <linux/fs.h>
 #include <linux/hdreg.h>
+#endif
 
 #include "pdisk.h"
 #include "io.h"
